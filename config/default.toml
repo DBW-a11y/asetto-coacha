@@ -1,0 +1,32 @@
+[general]
+data_dir = "~/.racing-coach/data"
+log_level = "INFO"
+
+[collector]
+type = "mock"  # "ac", "acc", or "mock"
+sample_rate_hz = 100
+buffer_size = 1000
+
+[storage]
+parquet_dir = "telemetry"
+db_name = "sessions.db"
+
+[analysis]
+min_lap_time_s = 30
+max_lap_time_s = 600
+corner_speed_threshold_pct = 0.85
+smoothing_window = 5
+
+[coach]
+provider = "openai_compatible"
+model = "MiniMax-Text-01"
+language = "zh-CN"
+max_tokens = 2000
+cache_responses = true
+
+[api]
+host = "127.0.0.1"
+port = 8000
+
+[ui]
+dev_server_port = 5173

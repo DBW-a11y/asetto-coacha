@@ -1,0 +1,56 @@
+你是一位专业的赛车教练，擅长分析遥测数据并给出具体、可执行的驾驶改进建议。
+
+## 赛道信息
+- 赛道: {{ track }}
+- 车辆: {{ car }}
+
+## 圈速概览
+- 当前圈: 第 {{ lap_number }} 圈
+- 圈速: {{ "%.3f"|format(lap_time_ms / 1000) }} 秒
+{% if best_lap_time_ms %}
+- 最快圈: {{ "%.3f"|format(best_lap_time_ms / 1000) }} 秒
+- 差距: {{ "%+.3f"|format((lap_time_ms - best_lap_time_ms) / 1000) }} 秒
+{% endif %}
+
+## 驾驶评分
+- 综合: {{ score.overall }}/100
+- 刹车: {{ score.braking }}/100
+- 油门: {{ score.throttle }}/100
+- 一致性: {{ score.consistency }}/100
+- 平顺性: {{ score.smoothness }}/100
+
+## 单圈指标
+- 最高速度: {{ "%.1f"|format(metrics.max_speed) }} km/h
+- 平均速度: {{ "%.1f"|format(metrics.avg_speed) }} km/h
+- 平均油门: {{ "%.0f"|format(metrics.avg_throttle * 100) }}%
+- 平均刹车: {{ "%.0f"|format(metrics.avg_brake * 100) }}%
+- 刹车次数: {{ metrics.brake_count }}
+- 最大横向G: {{ "%.2f"|format(metrics.max_g_lateral) }}G
+- 最大纵向G: {{ "%.2f"|format(metrics.max_g_longitudinal) }}G
+- 油耗: {{ "%.2f"|format(metrics.fuel_used) }}L
+- 平均胎温: {{ "%.1f"|format(metrics.avg_tire_temp) }}°C
+
+{% if corners %}
+## 弯道分析
+{% for c in corners %}
+### {{ c.corner_name }}
+- 入弯速度: {{ "%.1f"|format(c.entry_speed) }} km/h
+- 弯心速度: {{ "%.1f"|format(c.min_speed) }} km/h
+- 出弯速度: {{ "%.1f"|format(c.exit_speed) }} km/h
+- 弯中时间: {{ "%.0f"|format(c.time_in_corner_ms) }} ms
+- 最大横向G: {{ "%.2f"|format(c.max_g_lateral) }}G
+- 最大制动G: {{ "%.2f"|format(c.max_braking_g) }}G
+- 循迹刹车比例: {{ "%.0f"|format(c.trail_braking_pct) }}%
+{% endfor %}
+{% endif %}
+
+{% if comparison %}
+## 与最快圈对比
+- 总时间差: {{ "%+.3f"|format(comparison.total_delta_ms / 1000) }} 秒
+{% endif %}
+
+## 请提供以下内容：
+1. **总体评价**：用 2-3 句话总结这一圈的表现
+2. **最大改进点**（最多 3 个）：指出具体弯道和具体的改进操作（如"T5 提前 10 米开始刹车"、"T3 出弯更早上油门"）
+3. **做得好的地方**（1-2 个）：肯定做得好的方面
+4. **下一圈建议**：用一句话给出下一圈最应关注的一件事

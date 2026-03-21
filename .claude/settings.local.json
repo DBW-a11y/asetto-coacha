@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:assettocorsamods.net)",
+      "Bash(node:*)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(mkdir:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(rm:*)",
+      "Bash(source:*)",
+      "Bash(chmod +x:*)",
+      "Bash(mv:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

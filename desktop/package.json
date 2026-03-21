@@ -1,0 +1,57 @@
+{
+  "name": "racing-coach",
+  "version": "0.1.0",
+  "description": "Racing Coach - Telemetry Analysis & AI Coaching Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:ui": "cd ../ui && npm run build",
+    "build:python": "cd .. && pyinstaller --onefile --name racing-coach-server --add-data 'config/default.toml:config' --add-data 'src/racing_coach/coach/templates:racing_coach/coach/templates' src/racing_coach/main.py",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build": "npm run build:ui && npm run build:python && electron-builder"
+  },
+  "build": {
+    "appId": "com.racing-coach.app",
+    "productName": "Racing Coach",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js"
+    ],
+    "extraResources": [
+      {
+        "from": "../ui/dist",
+        "to": "ui",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../dist/racing-coach-server",
+        "to": "python-backend/racing-coach-server"
+      },
+      {
+        "from": "../config",
+        "to": "config",
+        "filter": ["**/*"]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": ["dmg"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Utility"
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}
