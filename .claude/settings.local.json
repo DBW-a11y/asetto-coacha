@@ -16,7 +16,15 @@
       "Bash(source:*)",
       "Bash(chmod +x:*)",
       "Bash(mv:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(file:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.motec.com.au)",
+      "Bash(curl:*)",
+      "Bash(xxd:*)",
+      "Bash(PYTHONPATH=src python3:*)",
+      "Bash(.venv/bin/pip install:*)",
+      "Bash(/Users/hxc/Documents/workspace/repository/racing/.venv/bin/pip install:*)"
     ]
   }
 }

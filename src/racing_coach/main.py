@@ -78,6 +78,38 @@ def cmd_record(args: argparse.Namespace) -> None:
     asyncio.run(run())
 
 
+def cmd_import_ld(args: argparse.Namespace) -> None:
+    """Import MoTeC .ld telemetry files."""
+    config = load_config(Path(args.config) if args.config else None)
+    setup_logging(config.log_level)
+
+    from .importer import import_ld_file
+    from .storage.session_store import SessionStore
+    from .storage.telemetry_store import TelemetryStore
+
+    data_dir = config.data_dir
+    session_store = SessionStore(data_dir / config.storage.db_name)
+    telemetry_store = TelemetryStore(data_dir / config.storage.parquet_dir)
+
+    for ld_path in args.files:
+        p = Path(ld_path)
+        if not p.exists():
+            print(f"File not found: {p}", file=sys.stderr)
+            continue
+        try:
+            sid = import_ld_file(p, session_store, telemetry_store)
+            session = session_store.get_session(sid)
+            laps = session_store.get_laps(sid)
+            best = min((l.lap_time_ms for l in laps), default=0)
+            best_str = f"{best/1000:.3f}s" if best else "-"
+            print(f"  {p.name} → session {sid} | {session.track} / {session.car} | "
+                  f"{len(laps)} laps | best {best_str}")
+        except Exception as e:
+            print(f"  ERROR importing {p.name}: {e}", file=sys.stderr)
+
+    session_store.close()
+
+
 def cmd_generate_mock(args: argparse.Namespace) -> None:
     """Generate mock telemetry data for development."""
     config = load_config(Path(args.config) if args.config else None)
@@ -136,12 +168,18 @@ def main() -> None:
     mock_p.add_argument("--track", default="Monza")
     mock_p.add_argument("--car", default="Ferrari 488 GT3")
 
+    # import-ld
+    import_p = sub.add_parser("import-ld", help="Import MoTeC .ld telemetry files")
+    import_p.add_argument("files", nargs="+", help="One or more .ld files")
+
     args = parser.parse_args()
 
     if args.command == "serve":
         cmd_serve(args)
     elif args.command == "record":
         cmd_record(args)
+    elif args.command == "import-ld":
+        cmd_import_ld(args)
     elif args.command == "generate-mock":
         cmd_generate_mock(args)
     else:

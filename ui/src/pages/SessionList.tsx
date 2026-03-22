@@ -73,24 +73,84 @@ function SessionCard({ session }: { session: Session }) {
 export default function SessionList() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
+  const [importing, setImporting] = useState(false)
 
-  useEffect(() => {
+  const loadSessions = () => {
     api.listSessions().then(setSessions).finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { loadSessions() }, [])
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    try {
+      await api.importLd(file)
+      loadSessions()
+    } catch (err) {
+      alert(`Import failed: ${err}`)
+    } finally {
+      setImporting(false)
+      e.target.value = ''
+    }
+  }
 
   if (loading) return <p>Loading sessions...</p>
   if (sessions.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 0', color: '#666' }}>
         <h2>No sessions yet</h2>
-        <p>Run <code>racing-coach generate-mock</code> to create sample data</p>
+        <p>Run <code>racing-coach generate-mock</code> to create sample data, or import a .ld file:</p>
+        <label style={{
+          display: 'inline-block',
+          padding: '10px 20px',
+          background: '#ff4444',
+          color: '#fff',
+          borderRadius: '6px',
+          cursor: importing ? 'wait' : 'pointer',
+          fontSize: '14px',
+          fontWeight: 500,
+          opacity: importing ? 0.6 : 1,
+          marginTop: '8px',
+        }}>
+          {importing ? 'Importing…' : 'Import .ld'}
+          <input
+            type="file"
+            accept=".ld"
+            style={{ display: 'none' }}
+            onChange={handleImport}
+            disabled={importing}
+          />
+        </label>
       </div>
     )
   }
 
   return (
     <div>
-      <h1 style={{ marginBottom: '24px' }}>Sessions</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+        <h1 style={{ margin: 0 }}>Sessions</h1>
+        <label style={{
+          padding: '8px 16px',
+          background: '#ff4444',
+          color: '#fff',
+          borderRadius: '6px',
+          cursor: importing ? 'wait' : 'pointer',
+          fontSize: '14px',
+          fontWeight: 500,
+          opacity: importing ? 0.6 : 1,
+        }}>
+          {importing ? 'Importing…' : 'Import .ld'}
+          <input
+            type="file"
+            accept=".ld"
+            style={{ display: 'none' }}
+            onChange={handleImport}
+            disabled={importing}
+          />
+        </label>
+      </div>
       <div style={{
         display: 'grid',
         gap: '16px',

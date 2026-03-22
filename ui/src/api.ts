@@ -90,4 +90,11 @@ export const api = {
     fetchJson<CompareResult>(`/analysis/${sessionId}/compare?ref_lap=${ref}&target_lap=${target}`),
   getCoaching: (sessionId: string, lap: number) =>
     fetchJson<{ advice: string }>(`/coaching/${sessionId}/lap/${lap}`),
+  importLd: async (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(`${BASE}/sessions/import`, { method: 'POST', body: form });
+    if (!res.ok) throw new Error(`Import failed: ${res.status} ${res.statusText}`);
+    return res.json() as Promise<{ session_id: string; track: string; car: string; num_laps: number }>;
+  },
 };

@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import tempfile
 from dataclasses import asdict
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
-from ..deps import get_session_store
+from ..deps import get_session_store, get_telemetry_store
 from ...storage.session_store import SessionStore
+from ...storage.telemetry_store import TelemetryStore
 
 router = APIRouter()
 
@@ -35,4 +38,32 @@ def get_session(
     return {
         **asdict(session),
         "laps": [asdict(l) for l in laps],
+    }
+
+
+@router.post("/import")
+def import_ld(
+    file: UploadFile,
+    session_store: SessionStore = Depends(get_session_store),
+    telemetry_store: TelemetryStore = Depends(get_telemetry_store),
+):
+    """Import a MoTeC .ld telemetry file."""
+    from ...importer import import_ld_file
+
+    with tempfile.NamedTemporaryFile(suffix=".ld", delete=False) as tmp:
+        tmp.write(file.file.read())
+        tmp_path = Path(tmp.name)
+
+    try:
+        session_id = import_ld_file(tmp_path, session_store, telemetry_store)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    session = session_store.get_session(session_id)
+    laps = session_store.get_laps(session_id)
+    return {
+        "session_id": session_id,
+        "track": session.track,
+        "car": session.car,
+        "num_laps": len(laps),
     }
